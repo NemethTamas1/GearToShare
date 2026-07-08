@@ -1,0 +1,25 @@
+services:
+  backend:
+    build:
+      dockerfile: Dockerfile.dev
+      container_name: geartoshare_backend
+
+    volumes:
+      - ./backend:/var/www/html
+    ports:
+      - "9000:9000"
+
+  db:
+    ports:
+      - "3306:3306"
+
+  adminer:
+    image: adminer:latest
+    container_name: geartoshare_adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+    networks:
+      - geartoshare
