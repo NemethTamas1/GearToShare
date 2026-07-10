@@ -2,8 +2,6 @@ services:
   backend:
     build:
       dockerfile: Dockerfile.dev
-      container_name: geartoshare_backend
-
     volumes:
       - ./backend:/var/www/html
     ports:
@@ -15,7 +13,6 @@ services:
 
   adminer:
     image: adminer:latest
-    container_name: geartoshare_adminer
     restart: unless-stopped
     ports:
       - "8081:8080"
@@ -23,3 +20,13 @@ services:
       - db
     networks:
       - geartoshare
+    
+  frontend:
+    build:
+      dockerfile: Dockerfile.dev
+    container_name: geartoshare_frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"

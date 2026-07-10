@@ -45,6 +45,17 @@ services:
     networks:
       - geartoshare
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    container_name: geartoshare_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - geartoshare
+
 networks:
   geartoshare:
     driver: bridge
