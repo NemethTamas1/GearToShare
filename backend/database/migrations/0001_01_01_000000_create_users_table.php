@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name', 100);
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password', 100); 
+            $table->string('password'); 
             $table->string('phone', 30);    
             $table->decimal('renter_rating', 3, 2)->nullable()->default(NULL);    
             $table->decimal('lender_rating', 3, 2)->nullable()->default(NULL);    
