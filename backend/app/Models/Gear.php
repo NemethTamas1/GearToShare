@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['title', 'description', 'type', 'price_per_day', 'city', 'address'])]
+#[Fillable(['title', 'description', 'category', 'attributes', 'price_per_day', 'city', 'address'])]
 class Gear extends Model
 {
     protected $table = "gears";
