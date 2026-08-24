@@ -16,11 +16,11 @@ return new class extends Migration
             $table->foreignId("user_id")->constrained("users")->cascadeOnDelete();
             $table->string("title", 150);
             $table->text("description")->nullable();
-            $table->string("type", 50);
+            $table->enum("category", ["hand_tool", "power_tool", "machine"]);
+            $table->json("attributes");
             $table->decimal("price_per_day", 8, 2);
             $table->string("city", 100)->index();
             $table->string("address", 255);
-            $table->string("image_path", 255)->nullable();
             $table->string("status", 20)->default("draft");
             $table->timestamps();
         });
