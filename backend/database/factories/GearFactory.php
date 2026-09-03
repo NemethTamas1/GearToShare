@@ -35,7 +35,7 @@ class GearFactory extends Factory
     {
         return $this->state(fn() => [
             'category' => 'hand_tool',
-            'attribues' => null
+            'attributes' => null
         ]);
     }
 
