@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GearController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -9,3 +10,5 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 Route::apiResource('/users', UserController::class);
+
+Route::apiResource("/gears", GearController::class);
