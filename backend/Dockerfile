@@ -23,6 +23,8 @@ RUN composer dump-autoload --optimize
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 storage bootstrap/cache
 
+RUN rm -f /etc/nginx/sites-enabled/default
+
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
