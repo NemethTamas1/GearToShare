@@ -14,7 +14,9 @@ class GearController extends Controller
      */
     public function index()
     {
-        //
+        $allGears = Gear::all();
+
+        return GearResource::collection($allGears);
     }
 
     /**
