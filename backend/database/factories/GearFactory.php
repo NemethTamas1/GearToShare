@@ -41,12 +41,14 @@ class GearFactory extends Factory
 
     public function powerTool(): static
     {
+        $availableModes = ['furas', 'utvefuras', 'csavarozas'];
+
         return $this->state(fn() => [
             'category' => 'power_tool',
             'attributes' => [
-                'battery_capacity_mAh' => $this->faker->randomElement([1500, 2000, 4000, 5000]),
-                'modes' => $this->faker->randomElements(['furas, utvefuras', 'csavarozas'], $this->faker->numberBetween(0, 3))
-            ]
+                'battery_capacity_mah' => $this->faker->randomElement([1500, 2000, 4000, 5000]),
+                'modes' => $this->faker->randomElements($availableModes, $this->faker->numberBetween(0, count($availableModes))),
+            ],
         ]);
     }
 
