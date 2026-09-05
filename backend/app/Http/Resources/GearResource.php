@@ -16,15 +16,14 @@ class GearResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            "user_id" => $this->user_id,
             "title" => $this->title,
             "description" => $this->description,
-            "type" => $this->type,
+            "category" => $this->category,
             "price_per_day" => $this->price_per_day,
             "city" => $this->city,
-            "address" => $this->address,
-            "image_path" => $this->image_path,
+            //"address" => $this->address,
             "status" => $this->status,
+            "attributes" => $this->attributes,
         ];
     }
 }
