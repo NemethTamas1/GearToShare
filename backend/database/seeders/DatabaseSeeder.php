@@ -16,15 +16,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $owners = User::factory()->count(3)->create();
-        User::factory()->count(5)->create();
+        User::factory()->count(3)->create(); // bérbeadók
+        User::factory()->count(5)->create(); // bérlők
 
-        $owners->each(function (User $owner) {
-            Gear::factory()->for($owner)->handTool()->create();
-            Gear::factory()->for($owner)->powerTool()->create();
-            Gear::factory()->for($owner)->machine()->create();
-        });
-
-        $this->call(RentalSeeder::class);
+        $this->call([
+            GearSeeder::class,
+            RentalSeeder::class,
+        ]);
     }
 }
