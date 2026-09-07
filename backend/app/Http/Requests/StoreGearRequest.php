@@ -27,8 +27,8 @@ class StoreGearRequest extends FormRequest
             "title" => ["string", "max:150", "min:0", "required"],
             "description" => ["string", "nullable"],
             "category" => Rule::in(["hand_tool", "power_tool", "machine"]),
-            "type" => ["string", "max:50", "min:0", "required"],
-            "price_per_day" => ["decimal", "required", "numeric", "min:0", "decimal:2"],
+            //"type" => ["string", "max:50", "min:0", "required"],
+            "price_per_day" => ["required", "numeric", "min:0", "decimal:2"],
             "city" => ["string", "max:100", "min:0", "required"],
             "address" => ["string", "max:255", "min:0", "required"],
 
