@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GearController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\UserController;
@@ -15,3 +16,11 @@ Route::apiResource('/users', UserController::class);
 Route::apiResource("/gears", GearController::class);
 
 Route::apiResource("/rentals", RentalController::class);
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/me', [AuthController::class, 'me']);
+});
