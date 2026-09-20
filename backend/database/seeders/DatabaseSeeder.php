@@ -16,8 +16,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->count(3)->create(); // bérbeadók
-        User::factory()->count(5)->create(); // bérlők
+        User::factory()->create([
+            "name" => "Kiss Béla",
+            "email" => "owner@gmail.com"
+        ]);
+
+        User::factory()->create([
+            "name" => "Varga Róbert",
+            "email" => "renter@gmail.com"
+        ]);
 
         $this->call([
             GearSeeder::class,

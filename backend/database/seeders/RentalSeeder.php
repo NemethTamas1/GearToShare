@@ -16,34 +16,22 @@ class RentalSeeder extends Seeder
     public function run(): void
     {
         $gears = Gear::all();
-        $renters = User::all();
+        $renter = User::where('email', 'renter@gmail.com')->first();
 
-        if ($gears->isEmpty() || $renters->isEmpty()) {
+        if ($gears->isEmpty() || !$renter) {
             $this->command->warn('RentalSeeder: nincs elérhető gear vagy user, seedelés kihagyva.');
             return;
         }
 
         Rental::factory()
             ->for($gears->random())
-            ->for($renters->random(), 'renter')
+            ->for($renter, 'renter')
             ->create(); // pending
 
         Rental::factory()
             ->accepted()
             ->for($gears->random())
-            ->for($renters->random(), 'renter')
-            ->create();
-
-        Rental::factory()
-            ->active()
-            ->for($gears->random())
-            ->for($renters->random(), 'renter')
-            ->create();
-
-        Rental::factory()
-            ->completed()
-            ->for($gears->random())
-            ->for($renters->random(), 'renter')
+            ->for($renter, 'renter')
             ->create();
     }
 }

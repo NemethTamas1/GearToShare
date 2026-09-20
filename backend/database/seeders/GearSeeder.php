@@ -14,17 +14,14 @@ class GearSeeder extends Seeder
      */
     public function run(): void
     {
-        $owners = User::all();
+        $owner = User::where('email', 'owner@gmail.com')->first();
 
-        if ($owners->isEmpty()) {
+        if (!$owner) {
             $this->command->warn('GearSeeder: nincs elérhető user, seedelés kihagyva.');
             return;
         }
 
-        $owners->each(function (User $owner) {
-            Gear::factory()->for($owner)->handTool()->create();
-            Gear::factory()->for($owner)->powerTool()->create();
-            Gear::factory()->for($owner)->machine()->create();
-        });
+        Gear::factory()->for($owner)->handTool()->create();
+        Gear::factory()->for($owner)->powerTool()->create();
     }
 }
