@@ -3,7 +3,6 @@ import type { Gear, Category } from '../types/gearTypes.tsx';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/axios.ts';
-import NavBarProfile from '../components/NavBarProfile.tsx';
 
 const CATEGORIES: Category[] = [
   { id: 'hand', label: 'Kézi szerszám', count: 612 },
