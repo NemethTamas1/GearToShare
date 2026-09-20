@@ -1,12 +1,12 @@
 export interface Gear {
-  id: string;
-  name: string;
-  location: string;
-  pricePerDay: number;
-  rating: number;
-  reviewCount: number;
-  available: boolean;
-  photoUrl?: string;
+  id: number;
+  title: string;
+  description: string;
+  category: 'hand_tool' | 'power_tool' | 'machine';
+  attributes: Record<string, unknown> | null;
+  price_per_day: string;
+  city: string;
+  status: 'available' | 'draft' | 'unavailable';
 }
 
 export interface Category {
