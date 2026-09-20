@@ -4,14 +4,15 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home.tsx';
 import Profile from './pages/Profile';
+import BaseLayout from './components/BaseLayout.tsx'
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+function ProtectedRoute() {
   const { user, loading } = useAuth();
 
   if (loading) return <p>Betöltés...</p>;
   if (!user) return <Navigate to="/login" replace />;
 
-  return <>{children}</>;
+  return <BaseLayout />;
 }
 
 export default function App() {
@@ -20,22 +21,11 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
+
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/profile" element={<Profile />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );
