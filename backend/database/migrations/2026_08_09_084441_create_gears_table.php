@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId("user_id")->constrained("users")->cascadeOnDelete();
             $table->string("title", 150);
             $table->text("description")->nullable();
-            $table->enum("category", ["hand_tool", "power_tool", "machine"]);
+            $table->enum("category", ["hand_tool", "cordless", "corded", "machine"]);
             $table->json("attributes")->nullable();
             $table->decimal("price_per_day", 8, 2);
             $table->string("city", 100)->index();

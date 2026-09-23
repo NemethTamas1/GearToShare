@@ -26,25 +26,42 @@ class StoreGearRequest extends FormRequest
         return [
             "title" => ["string", "max:150", "min:0", "required"],
             "description" => ["string", "nullable"],
-            "category" => Rule::in(["hand_tool", "power_tool", "machine"]),
-            //"type" => ["string", "max:50", "min:0", "required"],
             "price_per_day" => ["required", "numeric", "min:0", "decimal:2"],
             "city" => ["string", "max:100", "min:0", "required"],
             "address" => ["string", "max:255", "min:0", "required"],
+            "category" => Rule::in(["hand_tool", "corded", "cordless", "machine"]),
 
-            "attributes.battery_capacity_mAh" => [
-                "prohibited_unless:category,power_tool",
-                "required_if:category,power_tool",
+            // akkus szerszámok (corded)
+            "attributes.battery_capacity_mah" => [
+                "prohibited_unless:category,cordless",
+                "required_if:category,cordless",
                 "integer",
                 "min:0"
             ],
 
+            // vezetékes szerszámok (corded)
+            "attributes.power_w" => [
+                "prohibited_unless:category,corded",
+                "required_if:category,corded",
+                "integer",
+                "min:0",
+            ],
+
+            // mindkét szerszámtípusnál opcionális
             "attributes.modes" => [
-                "prohibited_unless:category,power_tool",
+                "prohibited_unless:category,cordless,corded",
                 "array",
                 "min:1",
             ],
-            "attributes.modes.*" => ["string", Rule::in(["drill", "hammer_drill", "chiseling"])],
+            "attributes.modes.*" => ["string", Rule::in([
+                "drill",
+                "hammer_drill",
+                "chiseling",
+                "screwdriving",
+                "cutting",
+                "grinding",
+                "sanding"
+            ])],
 
             "attributes.load_capacity_kg" => [
                 "prohibited_unless:category,machine",

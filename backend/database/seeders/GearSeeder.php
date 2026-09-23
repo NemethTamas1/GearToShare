@@ -22,6 +22,6 @@ class GearSeeder extends Seeder
         }
 
         Gear::factory()->for($owner)->handTool()->create();
-        Gear::factory()->for($owner)->powerTool()->create();
+        Gear::factory()->for($owner)->cordless()->create();
     }
 }

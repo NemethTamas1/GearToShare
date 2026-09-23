@@ -39,15 +39,24 @@ class GearFactory extends Factory
         ]);
     }
 
-    public function powerTool(): static
+    public function cordless(): static
     {
-        $availableModes = ['furas', 'utvefuras', 'csavarozas'];
-
         return $this->state(fn() => [
-            'category' => 'power_tool',
+            'category' => 'cordless',
             'attributes' => [
                 'battery_capacity_mah' => $this->faker->randomElement([1500, 2000, 4000, 5000]),
-                'modes' => $this->faker->randomElements($availableModes, $this->faker->numberBetween(0, count($availableModes))),
+                'modes' => $this->faker->randomElements(['drill', 'hammer_drill', 'chiseling'], $this->faker->numberBetween(0, 3)),
+            ],
+        ]);
+    }
+
+    public function corded():static
+    {
+        return $this->state(fn() => [
+            'category' => 'corded',
+            'attributes' => [
+                'power_w' => $this->faker->randomElement([650, 850, 1100, 1700]),
+                'modes' => $this->faker->randomElements(['drill', 'hammer_drill', 'chiseling'], $this->faker->numberBetween(0, 3)),
             ],
         ]);
     }
