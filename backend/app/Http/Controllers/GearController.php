@@ -24,10 +24,9 @@ class GearController extends Controller
      */
     public function store(StoreGearRequest $request)
     {
-        $gear = Gear::create([
-            ...$request->validated(),
-            'user_id' => $request->user()->id,
-        ]);
+        $gear = new Gear($request->validated());
+        $gear->user_id = $request->user()->id;
+        $gear->save();
 
         return new GearResource($gear);
     }
@@ -46,7 +45,7 @@ class GearController extends Controller
     public function update(UpdateGearRequest $request, Gear $gear)
     {
         // Későbbiekben Policy-be kiszervezni, most az MVP miatt van így.
-        if($request->user()->id != $gear->user_id) {
+        if ($request->user()->id != $gear->user_id) {
             abort(403, "Unauthorized action");
         }
 
