@@ -1,14 +1,9 @@
-import type { GearFormData, Category } from "../../types/gearFormTypes";
+import type { GearFormData } from "../../types/gearFormTypes";
+import { CATEGORY_LABELS } from "../../data/categorySchemas";
 import FieldInput from "./fields/FieldInput";
-import FieldTextarea from "./fields/FieldTextArea";
 import FieldLabel from "./fields/FieldLabel";
+import FieldTextarea from "./fields/FieldTextarea";
 
-const CATEGORY_LABELS: Record<Category, string> = {
-    hand_tool: 'Kézi szerszám',
-    cordless: 'Akkus',
-    corded: 'Vezetékes',
-    machine: 'Munkagép'
-};
 
 interface StepBasicInfoProps {
     form: GearFormData;

@@ -1,12 +1,6 @@
 import type { GearFormData, Category } from "../../types/gearFormTypes";
 import SummaryRow from "./fields/SummaryRow";
-
-const CATEGORY_LABELS: Record<Category, string> = {
-    hand_tool: 'Kézi szerszám',
-    cordless: 'Akkus',
-    corded: 'Vezetékes',
-    machine: 'Munkagép'
-};
+import { CATEGORY_LABELS } from "../../data/categorySchemas";
 
 interface StepSummaryProps {
     form: GearFormData;
