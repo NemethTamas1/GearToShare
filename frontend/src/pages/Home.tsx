@@ -3,6 +3,7 @@ import type { Gear, Category } from '../types/gearTypes.tsx';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/axios.ts';
+import GearUploadModal from '../components/gear-upload/GearUploadModal.tsx';
 
 const CATEGORIES: Category[] = [
   { id: 'hand', label: 'Kézi szerszám', count: 612 },
@@ -38,6 +39,7 @@ export default function Home({
   const [gears, setGears] = useState<Gear[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showUpload, setShowUpload] = useState(false);
 
   useEffect(() => {
     api.get('/api/gears')
@@ -49,6 +51,10 @@ export default function Home({
   const handleLogout = async () => {
     await logout();
     navigate('/login');
+  };
+
+  const handleGearCreated = () => {
+    setShowUpload(false);
   };
 
   return (
@@ -73,10 +79,12 @@ export default function Home({
             </button>
             <button
               className="cursor-pointer px-3.75 py-2.5 rounded-[7px] font-semibold text-[12.5px] bg-transparent border border-[#3a3833] text-white"
-              onClick={onListGear}
+              onClick={() => setShowUpload(true)}
             >
               Bérbe adnék
             </button>
+
+            {showUpload && <GearUploadModal onClose={() => setShowUpload(false)} />}
           </div>
         </section>
 
@@ -94,12 +102,12 @@ export default function Home({
               key={gear.id}
               className="text-left cursor-pointer p-0 bg-white border border-[#e3e0da] rounded-[11px] overflow-hidden"
             >
-              <div className="h-[132px] bg-[#eceae5] flex items-start p-2.5">
+              <div className="h-33 bg-[#eceae5] flex items-start p-2.5">
                 <span className="px-2 py-1 rounded-full bg-white border border-[#e3e0da] font-mono text-[9.5px] text-success">
                   {gear.status === 'available' ? 'SZABAD' : 'FOGLALT'}
                 </span>
               </div>
-              <div className="px-[15px] pt-3.5 pb-[15px]">
+              <div className="px-3.75 pt-3.5 pb-3.75">
                 <p className="text-[15px] leading-[1.3] font-semibold text-ink m-0 mb-1">{gear.title}</p>
                 <p className="text-xs text-[#8b877f] m-0 mb-2.5">{gear.city}</p>
                 <div className="flex items-baseline justify-between">
