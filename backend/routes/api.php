@@ -13,8 +13,15 @@ Route::get('/user', function (Request $request) {
 
 Route::apiResource('/users', UserController::class);
 
-Route::apiResource("/gears", GearController::class);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post("/gears", [GearController::class, "store"]);
+    Route::put("/gears/{gear}", [GearController::class, "update"]);
+    Route::delete("/gears/{gear}", [GearController::class, "destroy"]);
+});
 
+
+Route::get("/gears", [GearController::class, "index"]);
+Route::get("/gears/{gear}", [GearController::class, "show"]);
 Route::apiResource("/rentals", RentalController::class);
 
 Route::post('/register', [AuthController::class, 'register']);
