@@ -13,4 +13,20 @@ abstract class TestCase extends BaseTestCase
             'Accept' => 'application/json'
         ])->post($uri, $data);
     }
+
+    protected function putAsFrontend(string $uri, array $data = [])
+    {
+        return $this->withHeaders([
+            'Origin' => 'http://localhost',
+            'Accept' => 'application/json',
+        ])->put($uri, $data);
+    }
+
+    protected function deleteAsFrontend(string $uri)
+    {
+        return $this->withHeaders([
+            'Origin' => 'http://localhost',
+            'Accept' => 'application/json',
+        ])->delete($uri);
+    }
 }
