@@ -26,8 +26,7 @@ class UpdateGearRequest extends FormRequest
         return [
             "title" => ["string", "max:150", "min:0", "required"],
             "description" => ["string", "nullable"],
-            "type" => ["string", "max:50", "min:0", "required"],
-            "price_per_day" => ["decimal", "required", "numeric", "min:0", "decimal:2"],
+            "price_per_day" => ["required", "numeric", "min:0", "decimal:2"],
             "city" => ["string", "max:100", "min:0", "required"],
             "address" => ["string", "max:255", "min:0", "required"],
 
