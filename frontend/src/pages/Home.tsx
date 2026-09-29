@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Gear, Category } from '../types/gearTypes.tsx';
-import { useAuth } from '../context/AuthContext.tsx';
-import { useNavigate } from 'react-router-dom';
 import api from '../lib/axios.ts';
 import GearUploadModal from '../components/gear-upload/GearUploadModal.tsx';
 
@@ -101,7 +99,7 @@ export default function Home({
           ))}
         </div>
       </div>
-      {showUpload && <GearUploadModal onClose={() => setShowUpload(false)} onCreated={fetchGears} />}
+      {showUpload && <GearUploadModal onClose={() => setShowUpload(false)} />}
     </div>
   );
 }

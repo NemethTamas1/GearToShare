@@ -21,7 +21,7 @@ const INITIAL_STATE: GearFormData = {
 
 const TOTAL_STEPS = 5;
 
-export default function GearUploadModal({ onClose, onCreated}:{onClose:()=>void, onCreated:()=>void}) {
+export default function GearUploadModal({ onClose }:{onClose:()=>void}) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<GearFormData>(INITIAL_STATE);
   const [error, setError] = useState<string | null>(null);
