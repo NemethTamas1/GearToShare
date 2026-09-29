@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GearController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\UserController;
+use App\Models\Gear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post("/gears", [GearController::class, "store"]);
     Route::put("/gears/{gear}", [GearController::class, "update"]);
     Route::delete("/gears/{gear}", [GearController::class, "destroy"]);
+    Route::get('/mygears', [GearController::class, "mine"]);
+    Route::patch('/gears/{gear}/status', [GearController::class, "updateStatus"]);
 });
 
 
