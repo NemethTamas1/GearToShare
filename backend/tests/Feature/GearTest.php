@@ -171,4 +171,60 @@ class GearTest extends TestCase
 
         $this->assertDatabaseHas('gears', ['id' => $gear->id]);
     }
+
+    public function test_user_sees_only_own_gears_including_drafts(): void
+    {
+        $owner = User::factory()->create();
+        $other = User::factory()->create();
+
+        Gear::factory()->for($owner)->handTool()->create(['title' => 'Saját elérhető']);
+        Gear::factory()->for($owner)->handTool()->draft()->create(['title' => 'Saját vázlat']);
+        Gear::factory()->for($other)->handTool()->create(['title' => 'Idegen eszköz']);
+
+        $this->actingAs($owner)
+            ->getAsFrontend('/api/mygears')
+            ->assertStatus(200)
+            ->assertJsonCount(2, 'data')
+            ->assertJsonMissing(['title' => 'Idegen eszköz']);
+    }
+
+    public function test_guest_cannot_list_own_gears(): void
+    {
+        $this->getAsFrontend('/api/mygears')->assertStatus(401);
+    }
+
+    public function test_owner_can_change_gear_status(): void
+    {
+        $owner = User::factory()->create();
+        $gear = Gear::factory()->for($owner)->handTool()->draft()->create();
+
+        $this->actingAs($owner)
+            ->patchAsFrontend("/api/gears/{$gear->id}/status", ['status' => 'available'])
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('gears', ['id' => $gear->id, 'status' => 'available']);
+    }
+
+    public function test_non_owner_cannot_change_gear_status(): void
+    {
+        $owner = User::factory()->create();
+        $other = User::factory()->create();
+        $gear = Gear::factory()->for($owner)->handTool()->draft()->create();
+
+        $this->actingAs($other)
+            ->patchAsFrontend("/api/gears/{$gear->id}/status", ['status' => 'available'])
+            ->assertStatus(403);
+
+        $this->assertDatabaseHas('gears', ['id' => $gear->id, 'status' => 'draft']);
+    }
+
+    public function test_gear_status_rejects_invalid_value(): void
+    {
+        $owner = User::factory()->create();
+        $gear = Gear::factory()->for($owner)->handTool()->create();
+
+        $this->actingAs($owner)
+            ->patchAsFrontend("/api/gears/{$gear->id}/status", ['status' => 'rented'])
+            ->assertStatus(422);
+    }
 }
