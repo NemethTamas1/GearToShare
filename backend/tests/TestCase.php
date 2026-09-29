@@ -6,27 +6,36 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
-    protected function postAsFrontend(string $uri, array $data = [])
+    private function frontendHeaders(): array
     {
-        return $this->withHeaders([
+        return [
             'Origin' => 'http://localhost',
             'Accept' => 'application/json'
-        ])->post($uri, $data);
+        ];
+    }
+
+    protected function getAsFrontend(string $uri)
+    {
+        return $this->withHeaders($this->frontendHeaders())->get($uri);
+    }
+
+    protected function postAsFrontend(string $uri, array $data = [])
+    {
+        return $this->withHeaders($this->frontendHeaders())->post($uri, $data);
     }
 
     protected function putAsFrontend(string $uri, array $data = [])
     {
-        return $this->withHeaders([
-            'Origin' => 'http://localhost',
-            'Accept' => 'application/json',
-        ])->put($uri, $data);
+        return $this->withHeaders($this->frontendHeaders())->put($uri, $data);
+    }
+
+    protected function patchAsFrontend(string $uri, array $data = [])
+    {
+        return $this->withHeaders($this->frontendHeaders())->patch($uri, $data);
     }
 
     protected function deleteAsFrontend(string $uri)
     {
-        return $this->withHeaders([
-            'Origin' => 'http://localhost',
-            'Accept' => 'application/json',
-        ])->delete($uri);
+        return $this->withHeaders($this->frontendHeaders())->delete($uri);
     }
 }
