@@ -21,7 +21,7 @@ const INITIAL_STATE: GearFormData = {
 
 const TOTAL_STEPS = 5;
 
-export default function GearUploadModal({ onClose }: { onClose: () => void }) {
+export default function GearUploadModal({ onClose, onCreated}:{onClose:()=>void, onCreated:()=>void}) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<GearFormData>(INITIAL_STATE);
   const [error, setError] = useState<string | null>(null);
@@ -49,15 +49,18 @@ export default function GearUploadModal({ onClose }: { onClose: () => void }) {
         description: form.description,
         city: form.city,
         address: form.address,
-        price_per_day: form.price_per_day,
+        price_per_day: Number(form.price_per_day).toFixed(2),
         category: form.category,
         attributes: currentSchema.length > 0 ? form.attributes : null,
       });
+      onCreated();
       onClose();
     } catch {
       setError('Nem sikerült létrehozni a hirdetést.');
+      console.log(error)
     } finally {
       setSubmitting(false);
+      onClose();
     }
   };
 
