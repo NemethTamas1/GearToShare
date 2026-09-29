@@ -21,7 +21,7 @@ return new class extends Migration
             $table->decimal("price_per_day", 8, 2);
             $table->string("city", 100)->index();
             $table->string("address", 255);
-            $table->string("status", 20)->default("available");
+            $table->string("status", 20)->default("draft");
             $table->timestamps();
         });
     }
