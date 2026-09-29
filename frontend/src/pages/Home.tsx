@@ -1,17 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Gear, Category } from '../types/gearTypes.tsx';
 import { useAuth } from '../context/AuthContext.tsx';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/axios.ts';
 import GearUploadModal from '../components/gear-upload/GearUploadModal.tsx';
-
-const CATEGORIES: Category[] = [
-  { id: 'hand', label: 'Kézi szerszám', count: 612 },
-  { id: 'electric', label: 'Elektromos', count: 498 },
-  { id: 'battery', label: 'Akkus', count: 377 },
-  { id: 'garden', label: 'Kerti gép', count: 214 },
-  { id: 'heavy', label: 'Munkagép', count: 141 },
-];
 
 function formatFt(value: number): string {
   return `${value.toLocaleString('hu-HU')} Ft`;
@@ -19,7 +11,6 @@ function formatFt(value: number): string {
 
 interface HomeProps {
   cityName?: string;
-  gearsInCity?: number;
   categories?: Category[];
   onSearchFocus?: () => void;
   onFindGear?: () => void;
@@ -28,41 +19,32 @@ interface HomeProps {
 
 export default function Home({
   cityName = 'Budapesten',
-  gearsInCity = 2,
-  categories = CATEGORIES,
-  onSearchFocus,
   onFindGear,
-  onListGear,
 }: HomeProps) {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
   const [gears, setGears] = useState<Gear[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
 
-  useEffect(() => {
+  const fetchGears = useCallback(() => {
+    setLoading(true);
+    setError(null);
     api.get('/api/gears')
       .then((res) => setGears(res.data.data))
-      .catch(() => setError("Nem sikerült betölteni az eszközöket."))
-      .finally(() => setLoading(false))
+      .catch(() => setError('Nem sikerült lekérdezni az eszközöket.'))
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
-
-  const handleGearCreated = () => {
-    setShowUpload(false);
-  };
+  useEffect(() => {
+    fetchGears();
+  }, [fetchGears]);
 
   return (
     <div className="h-full flex flex-col overflow-hidden bg-bg font-sans">
       <div className="flex-1 px-5 pt-4 overflow-y-auto">
         <section className="bg-ink rounded-xl px-5 py-5.5 mb-5">
           <p className="font-mono text-[9.5px] tracking-widest text-accent m-0 mb-2.5">
-            {gearsInCity.toLocaleString('hu-HU')} GÉP {cityName.toUpperCase()}
+            {loading ? '' : `${gears.length.toLocaleString('hu-HU')} GÉP ${cityName.toUpperCase()}`}
           </p>
           <h1 className="text-[23px] font-extrabold leading-[1.15] tracking-tight text-white m-0 mb-2">
             Hétvégi munka, hétköznapi ár.
@@ -83,8 +65,6 @@ export default function Home({
             >
               Bérbe adnék
             </button>
-
-            {showUpload && <GearUploadModal onClose={() => setShowUpload(false)} />}
           </div>
         </section>
 
@@ -104,7 +84,7 @@ export default function Home({
             >
               <div className="h-33 bg-[#eceae5] flex items-start p-2.5">
                 <span className="px-2 py-1 rounded-full bg-white border border-[#e3e0da] font-mono text-[9.5px] text-success">
-                  {gear.status === 'available' ? 'SZABAD' : 'FOGLALT'}
+                  SZABAD
                 </span>
               </div>
               <div className="px-3.75 pt-3.5 pb-3.75">
@@ -121,10 +101,7 @@ export default function Home({
           ))}
         </div>
       </div>
-
-      <button onClick={handleLogout} className="flex-none py-3 border-t border-[#e3e0da] text-secondary text-sm">
-        Kijelentkezés
-      </button>
+      {showUpload && <GearUploadModal onClose={() => setShowUpload(false)} onCreated={fetchGears} />}
     </div>
   );
 }
