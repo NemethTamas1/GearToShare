@@ -48,3 +48,19 @@ Az `Accept: application/json` külön szükséges: enélkül egy nem-hitelesíte
 | `test_owner_can_change_gear_status` | `PATCH /api/gears/{gear}/status` tulajdonosnak → 200, a státusz módosul |
 | `test_non_owner_cannot_change_gear_status` | Idegen user → 403, a státusz változatlan |
 | `test_gear_status_rejects_invalid_value` | Érvénytelen érték (`rented`) → 422 |
+
+## `RentalTest.php`
+
+| Teszt | Mit ellenőriz |
+|---|---|
+| `test_authenticated_user_can_create_rental_request` | Sikeres bérlési igény → 201, `pending` státusszal |
+| `test_guest_cannot_create_rental_request` | Bejelentkezés nélkül → 401 |
+| `test_owner_cannot_rent_own_gear` | Tulajdonos nem bérelheti a saját eszközét → 422 |
+| `test_rental_creation_fails_without_required_fields` | Üres payload → 422 |
+| `test_rental_total_price_is_calculated_from_gear_price_and_days` | A `total_price` a `price_per_day × napok` szorzatából számolódik, foglaláskor rögzül |
+| `test_owner_can_accept_pending_rental` | Gear tulajdonosa elfogadhatja a függő kérelmet → 200 |
+| `test_owner_can_reject_pending_rental` | Gear tulajdonosa elutasíthatja → 200 |
+| `test_renter_cannot_change_own_rental_status` | A bérlő nem módosíthatja a saját kérelme státuszát → 403 |
+| `test_unrelated_user_cannot_change_rental_status` | Sem tulajdonos, sem bérlő nem lehet → 403 |
+| `test_owner_cannot_change_status_of_non_pending_rental` | Már `accepted` státuszú rekord nem módosítható újra → 422 |
+| `test_rental_status_rejects_invalid_value` | Érvénytelen érték (`active`) → 422, csak `accepted`/`rejected` engedett |
