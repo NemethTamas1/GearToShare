@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('gear_id')->constrained('gears')->cascadeOnDelete();
             $table->foreignId('renter_id')->constrained('users')->cascadeOnDelete();
+            $table->text('message')->nullable();
             $table->date('start_date');
             $table->date('end_date');
             $table->decimal('total_price', 8, 2);
