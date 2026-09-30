@@ -15,17 +15,21 @@ Route::get('/user', function (Request $request) {
 Route::apiResource('/users', UserController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
+    // Gears
     Route::post("/gears", [GearController::class, "store"]);
     Route::put("/gears/{gear}", [GearController::class, "update"]);
     Route::delete("/gears/{gear}", [GearController::class, "destroy"]);
     Route::get('/mygears', [GearController::class, "mine"]);
     Route::patch('/gears/{gear}/status', [GearController::class, "updateStatus"]);
+
+    // Rentals
+    Route::post('/rentals', [RentalController::class, 'store']);
+    Route::patch('/rentals/{rental}', [RentalController::class, 'update']);
 });
 
 
 Route::get("/gears", [GearController::class, "index"]);
 Route::get("/gears/{gear}", [GearController::class, "show"]);
-Route::apiResource("/rentals", RentalController::class);
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
