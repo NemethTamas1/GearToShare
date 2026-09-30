@@ -4,45 +4,58 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRentalRequest;
 use App\Http\Requests\UpdateRentalRequest;
+use App\Http\Resources\RentalResource;
+use App\Models\Gear;
 use App\Models\Rental;
+use Carbon\Carbon;
 
 class RentalController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreRentalRequest $request)
     {
-        //
+        $gear = Gear::findOrFail($request->validated('gear_id'));
+
+        if ($gear->user_id === $request->user()->id) {
+            abort(422, "Nem bérelheted ki a saját eszközödet.");
+        }
+
+        $days = Carbon::parse($request->validated('start_date'))
+            ->diffInDays(Carbon::parse($request->validated('end_date')));
+
+        $rental = new Rental($request->validated());
+        $rental->renter_id = $request->user()->id;
+        $rental->total_price = $gear->price_per_day * max($days, 1);
+        $rental->save();
+
+        return new RentalResource($rental);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Rental $rental)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateRentalRequest $request, Rental $rental)
     {
-        //
+        if ($rental->gear->user_id !== $request->user()->id) {
+            abort(403, "Unauthorized action.");
+        }
+
+        if ($rental->status !== 'pending') {
+            abort(422, "Csak függőben lévő kérelem állapota módosítható.");
+        }
+
+        $rental->status = $request->validated("status");
+        $rental->save();
+
+        return new RentalResource($rental);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Rental $rental)
     {
         //
