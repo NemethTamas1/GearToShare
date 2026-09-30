@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import type { Gear, Category } from '../types/gearTypes.tsx';
 import api from '../lib/axios.ts';
 import GearUploadModal from '../components/gear-upload/GearUploadModal.tsx';
+import { useNavigate } from 'react-router-dom';
 
 function formatFt(value: number): string {
   return `${value.toLocaleString('hu-HU')} Ft`;
@@ -23,6 +24,7 @@ export default function Home({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
+  const navigate = useNavigate();
 
   const fetchGears = useCallback(() => {
     setLoading(true);
@@ -77,7 +79,7 @@ export default function Home({
 
           {!loading && !error && gears.map((gear) => (
             <button
-              key={gear.id}
+              key={gear.id} onClick={()=>navigate(`/gears/${gear.id}`)}
               className="text-left cursor-pointer p-0 bg-white border border-[#e3e0da] rounded-[11px] overflow-hidden"
             >
               <div className="h-33 bg-[#eceae5] flex items-start p-2.5">
