@@ -5,6 +5,7 @@ import Register from './pages/Register';
 import Home from './pages/Home.tsx';
 import Profile from './pages/Profile';
 import BaseLayout from './components/BaseLayout.tsx'
+import GearDetail from './pages/GearDetail.tsx';
 
 function ProtectedRoute() {
   const { user, loading } = useAuth();
@@ -25,6 +26,7 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/gears/:id" element={<GearDetail />} />
         </Route>
       </Routes>
     </BrowserRouter>
