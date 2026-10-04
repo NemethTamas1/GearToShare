@@ -23,6 +23,14 @@ class RentalResource extends JsonResource
             "total_price" => $this->total_price,
             "status" => $this->status,
             "message" => $this->message,
+            "gear" => $this->whenLoaded('gear', fn() => [
+                'id' => $this->gear->id,
+                'title' => $this->gear->title
+            ]),
+            "renter" => $this->whenLoaded('renter', fn() => [
+                'id' => $this->renter->id,
+                'name' => $this->renter->name
+            ]),
         ];
     }
 }
