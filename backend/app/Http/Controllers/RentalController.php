@@ -8,6 +8,7 @@ use App\Http\Resources\RentalResource;
 use App\Models\Gear;
 use App\Models\Rental;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class RentalController extends Controller
 {
@@ -59,5 +60,18 @@ class RentalController extends Controller
     public function destroy(Rental $rental)
     {
         //
+    }
+
+    public function incoming(Request $request)
+    {
+        $rentals = Rental::whereHas('gear', function ($query) use ($request) {
+            $query->where('user_id', $request->user()->id);
+        })
+            ->where('status', 'pending')
+            ->with(['gear', 'renter'])
+            ->latest()
+            ->get();
+
+        return RentalResource::collection($rentals);
     }
 }
