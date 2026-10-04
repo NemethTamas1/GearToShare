@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rentals
     Route::post('/rentals', [RentalController::class, 'store']);
     Route::patch('/rentals/{rental}', [RentalController::class, 'update']);
+    Route::get('/rentals/incoming', [RentalController::class, 'incoming']);
 });
 
 
