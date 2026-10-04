@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext';
 import MyGearList from '../components/profile/MyGearList';
+import IncomingRentalsList from '../components/profile/IncomingRentalsList';
 
 
 export default function Profile() {
@@ -38,6 +39,8 @@ export default function Profile() {
         <p className="text-2xl font-extrabold text-white mb-1">— Ft</p>
         <p className="text-xs text-[#b8b4ac]">Minta adat — a bevétel-számítás jövőbeli munka</p>
       </div>
+
+      <IncomingRentalsList />
 
       <section className="mt-5">
         <h2 className="px-5 pb-1 text-sm font-bold text-ink">Eszközeim</h2>
