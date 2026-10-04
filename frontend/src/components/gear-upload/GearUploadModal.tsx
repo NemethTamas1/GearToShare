@@ -53,7 +53,6 @@ export default function GearUploadModal({ onClose }:{onClose:()=>void}) {
         category: form.category,
         attributes: currentSchema.length > 0 ? form.attributes : null,
       });
-      onCreated();
       onClose();
     } catch {
       setError('Nem sikerült létrehozni a hirdetést.');

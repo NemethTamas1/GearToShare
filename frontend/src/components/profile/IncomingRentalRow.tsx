@@ -23,7 +23,7 @@ export default function IncomingRentalRow({ rental, onDecided }: { rental: Renta
     };
 
     return (
-        <div className="border border-[#d69b28] rounded-xl p-3.5">
+        <div className="border border-accent rounded-xl p-3.5">
             <div className="flex items-center justify-between mb-1.5">
                 <p className="text-sm font-semibold text-ink">{rental.gear?.title ?? 'Eszköz'}</p>
                 <span className="px-2 py-1 rounded-full bg-[#fdf3e2] text-[#a97416] text-[10px] font-mono">
