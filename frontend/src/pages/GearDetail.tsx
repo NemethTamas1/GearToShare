@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import type { Gear } from "../types/gearTypes";
 import api from "../lib/axios";
+import axios from "axios";
 
 const CATEGORY_LABELS: Record<string, string> = {
     hand_tool: 'Kézi szerszám',
@@ -19,6 +20,36 @@ export default function GearDetail() {
     const [gear, setGear] = useState<Gear | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const [showForm, setShowForm] = useState(false);
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [message, setMessage] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
+    const [sent, setSent] = useState(false);
+
+    const handleSubmit = async () => {
+        setSubmitting(true);
+        setSubmitError(null);
+        try {
+            await api.post('/api/rentals', {
+                gear_id: gear?.id,
+                start_date: startDate,
+                end_date: endDate,
+                message: message || null,
+            });
+            setSent(true);
+            setShowForm(false);
+        } catch (err) {
+            if (axios.isAxiosError(err)) {
+                const errors = err.response?.data?.errors;
+                setSubmitError(errors ? Object.values(errors).flat().join(' ') : err.response?.data?.message ?? "Nem sikerült elküldeni a kérelmet.")
+            };
+        } finally {
+            setSubmitting(false);
+        }
+    }
 
     useEffect(() => {
         api.get(`/api/gears/${id}`)
@@ -67,12 +98,63 @@ export default function GearDetail() {
                         {formatFt(Number(gear.price_per_day))}
                         <span className="text-sm text-secondary font-normal"> / nap</span>
                     </p>
-                    <button
-                        disabled
-                        className="w-full py-4 rounded-xl bg-[#e3e0da] text-secondary font-bold text-[15.5px] cursor-not-allowed"
-                    >
-                        Foglalás — hamarosan
-                    </button>
+
+                    {sent && (
+                        <p className="text-sm text-success text-center py-3">
+                            A kérelmedet elküldtük, a tulajdonos hamarosan válaszol.
+                        </p>
+                    )}
+
+                    {!sent && !showForm && (
+                        <button
+                            onClick={() => setShowForm(true)}
+                            className="w-full py-4 rounded-xl bg-accent text-ink font-bold text-[15.5px]"
+                        >
+                            Bérlési kérelem küldése
+                        </button>
+                    )}
+
+                    {showForm && (
+                        <div className="flex flex-col gap-3">
+                            <div>
+                                <label className="block font-mono text-[10px] tracking-wider text-[#8b877f] mb-1.5">KEZDŐ DÁTUM</label>
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl border border-[#d6d2cb] text-sm text-ink"
+                                />
+                            </div>
+                            <div>
+                                <label className="block font-mono text-[10px] tracking-wider text-[#8b877f] mb-1.5">VÉGSŐ DÁTUM</label>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl border border-[#d6d2cb] text-sm text-ink"
+                                />
+                            </div>
+                            <div>
+                                <label className="block font-mono text-[10px] tracking-wider text-[#8b877f] mb-1.5">ÜZENET (OPCIONÁLIS)</label>
+                                <textarea
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    rows={3}
+                                    className="w-full px-4 py-3 rounded-xl border border-[#d6d2cb] text-sm text-ink resize-none"
+                                />
+                            </div>
+
+                            {submitError && <p className="text-danger text-sm">{submitError}</p>}
+
+                            <button
+                                onClick={handleSubmit}
+                                disabled={submitting || !startDate || !endDate}
+                                className="w-full py-4 rounded-xl bg-accent text-ink font-bold text-[15.5px] disabled:opacity-60"
+                            >
+                                {submitting ? 'Küldés...' : 'Kérelem elküldése'}
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
