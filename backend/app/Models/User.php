@@ -58,7 +58,7 @@ class User extends Authenticatable
     }
 
     // Kapott értékelési rekordok. 
-    public function ratingsReceieved(): HasMany
+    public function ratingsReceived(): HasMany
     {
         return $this->hasMany(Rating::class, 'rated_id');
     }
