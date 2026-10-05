@@ -64,3 +64,28 @@ Az `Accept: application/json` külön szükséges: enélkül egy nem-hitelesíte
 | `test_unrelated_user_cannot_change_rental_status` | Sem tulajdonos, sem bérlő nem lehet → 403 |
 | `test_owner_cannot_change_status_of_non_pending_rental` | Már `accepted` státuszú rekord nem módosítható újra → 422 |
 | `test_rental_status_rejects_invalid_value` | Érvénytelen érték (`active`) → 422, csak `accepted`/`rejected` engedett |
+
+## `RatingTest.php`
+
+| Teszt | Mit ellenőriz |
+|---|---|
+| `test_renter_can_rate_owner_after_completed_rental` | Lezárt bérlés után a bérlő értékelheti a tulajdonost → 201, a `rater_id`/`rated_id` helyes |
+| `test_owner_can_rate_renter_after_completed_rental` | A tulajdonos értékelheti a bérlőt → 201 |
+| `test_unrelated_user_cannot_rate` | Sem tulajdonos, sem bérlő → 403 |
+| `test_cannot_rate_non_completed_rental` | `active` állapotú bérlés nem értékelhető → 422 |
+| `test_cannot_rate_same_rental_twice` | Ugyanaz a fél kétszer nem értékelheti ugyanazt a bérlést → 422 |
+| `test_rating_rejects_invalid_score` | `0`, `6`, nem szám → 422 |
+| `test_guest_cannot_rate` | Bejelentkezés nélkül → 401 |
+| `test_received_ratings_returns_average_and_count_for_current_user_only` | A `GET /api/myratings` csak a nekem szóló értékeléseket adja, helyes átlaggal és darabszámmal |
+
+### Teszt-segéd: `completedRental()`
+
+A `RatingTest` minden esete egy lezárt bérlésből indul, ezért egy privát segéd állítja elő: két user (tulajdonos, bérlő), egy gear és egy `completed` státuszú rental, amit tömbként ad vissza (`[$owner, $renter, $rental]`). A tesztek PHP destrukturálással bontják szét (`[$owner, $renter, $rental] = $this->completedRental();`), és csak a szükséges elemeket veszik fel (`[, $renter, $rental]`).
+
+### A `completed` állapot csak teszt-adat
+
+A `RentalFactory::completed()` közvetlenül `completed` rekordot állít elő. A valódi alkalmazásban a `completed` állapotba **jelenleg semmi nem juttat el** egy bérlést: az `accepted → active` (QR/Barion) és az `active → completed` (időzített lezárás) átmenet még nincs implementálva. Ezért az értékelés leadása a felületről egyelőre nem végigvihető, a lánc tesztelését a factory végzi.
+
+### Kettős védelem a dupla értékelés ellen
+
+A második értékelés ellen két szinten van védelem: a `RatingController` `422`-t ad, és a `ratings` tábla `(rental_id, rater_id)` egyedi kulcsa adatbázis szinten is megakadályozza. A `test_cannot_rate_same_rental_twice` az első szintet ellenőrzi. Ha a controller-ellenőrzés hibázna, az egyedi kulcs `500`-at okozna `422` helyett, ez a teszt ezt az esetet fogja meg.
