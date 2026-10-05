@@ -6,12 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['gear_id', 'renter_id', 'start_date', 'end_date', 'total_price', 'message'])]
 class Rental extends Model
 {
     use HasFactory;
-    
+
     protected $table = "rentals";
 
     public $timestamps = true;
@@ -24,5 +25,10 @@ class Rental extends Model
     public function renter(): BelongsTo
     {
         return $this->belongsTo(User::class, 'renter_id');
+    }
+
+    public function ratings(): HasMany
+    {
+        return $this->hasMany(Rating::class);
     }
 }
