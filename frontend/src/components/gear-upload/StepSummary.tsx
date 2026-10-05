@@ -1,4 +1,4 @@
-import type { GearFormData, Category } from "../../types/gearFormTypes";
+import type { GearFormData } from "../../types/gearFormTypes";
 import SummaryRow from "./fields/SummaryRow";
 import { CATEGORY_LABELS } from "../../data/categorySchemas";
 
