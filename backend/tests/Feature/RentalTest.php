@@ -365,4 +365,51 @@ class RentalTest extends TestCase
             ->getAsFrontend("/api/rentals/{$rental->id}")
             ->assertJsonMissingPath('data.handover_token');
     }
+
+    public function test_renter_sees_own_rental_in_myrentals(): void
+    {
+        $owner = User::factory()->create();
+        $renter = User::factory()->create();
+        $gear = Gear::factory()->for($owner)->handTool()->create();
+        $rental = Rental::factory()->for($gear)->for($renter, 'renter')->create();
+
+        $this->actingAs($renter)
+            ->getAsFrontend('/api/myrentals')
+            ->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $rental->id);
+    }
+
+    public function test_owner_sees_rental_received_on_own_gear_in_myrentals(): void
+    {
+        $owner = User::factory()->create();
+        $renter = User::factory()->create();
+        $gear = Gear::factory()->for($owner)->handTool()->create();
+        $rental = Rental::factory()->for($gear)->for($renter, 'renter')->create();
+
+        $this->actingAs($owner)
+            ->getAsFrontend('/api/myrentals')
+            ->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $rental->id);
+    }
+
+    public function test_unrelated_user_sees_empty_myrentals(): void
+    {
+        $owner = User::factory()->create();
+        $renter = User::factory()->create();
+        $stranger = User::factory()->create();
+        $gear = Gear::factory()->for($owner)->handTool()->create();
+        Rental::factory()->for($gear)->for($renter, 'renter')->create();
+
+        $this->actingAs($stranger)
+            ->getAsFrontend('/api/myrentals')
+            ->assertStatus(200)
+            ->assertJsonCount(0, 'data');
+    }
+
+    public function test_guest_cannot_list_myrentals(): void
+    {
+        $this->getAsFrontend('/api/myrentals')->assertStatus(401);
+    }
 }
