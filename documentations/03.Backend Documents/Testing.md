@@ -76,6 +76,10 @@ Az `Accept: application/json` külön szükséges: enélkül egy nem-hitelesíte
 | `test_confirm_handover_rejects_wrong_token` | Rossz token → 422, a státusz marad `accepted` |
 | `test_owner_cannot_confirm_handover` | A tulajdonos nem erősítheti meg → 403 |
 | `test_handover_token_cannot_be_used_twice` | Másodszor ugyanazzal a tokennel → 422 |
+| `test_renter_sees_own_rental_in_myrentals` | A bérlő látja a saját bérlését a `GET /api/myrentals` listában |
+| `test_owner_sees_rental_received_on_own_gear_in_myrentals` | A tulajdonos látja a saját gear-jére érkezett bérlést |
+| `test_unrelated_user_sees_empty_myrentals` | Idegen user üres listát kap |
+| `test_guest_cannot_list_myrentals` | Vendég → 401 |
 
 ## `RatingTest.php`
 
