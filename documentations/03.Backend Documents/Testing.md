@@ -64,6 +64,18 @@ Az `Accept: application/json` külön szükséges: enélkül egy nem-hitelesíte
 | `test_unrelated_user_cannot_change_rental_status` | Sem tulajdonos, sem bérlő nem lehet → 403 |
 | `test_owner_cannot_change_status_of_non_pending_rental` | Már `accepted` státuszú rekord nem módosítható újra → 422 |
 | `test_rental_status_rejects_invalid_value` | Érvénytelen érték (`active`) → 422, csak `accepted`/`rejected` engedett |
+| `test_renter_sees_address_and_owner_phone_after_acceptance` | A bérlő a címet és a tulajdonos telefonját látja → 200 |
+| `test_owner_sees_renter_phone_but_no_address_after_acceptance` | A tulajdonos a bérlő telefonját látja, címet nem |
+| `test_contact_is_hidden_while_rental_is_pending` | `pending` állapotban nincs `contact` |
+| `test_unrelated_user_cannot_view_rental` | Idegen user → 403 |
+| `test_guest_cannot_view_rental` | Vendég → 401 |
+| `test_accepting_a_rental_generates_handover_token` | Elfogadáskor generálódik a token |
+| `test_owner_sees_handover_token` | A tulajdonos látja a tokent |
+| `test_renter_does_not_see_handover_token` | A bérlő nem látja a tokent |
+| `test_renter_can_confirm_handover_with_valid_token` | Jó tokennel → 200, `active`, token törölve, `handover_confirmed_at` kitöltve |
+| `test_confirm_handover_rejects_wrong_token` | Rossz token → 422, a státusz marad `accepted` |
+| `test_owner_cannot_confirm_handover` | A tulajdonos nem erősítheti meg → 403 |
+| `test_handover_token_cannot_be_used_twice` | Másodszor ugyanazzal a tokennel → 422 |
 
 ## `RatingTest.php`
 
@@ -78,14 +90,26 @@ Az `Accept: application/json` külön szükséges: enélkül egy nem-hitelesíte
 | `test_guest_cannot_rate` | Bejelentkezés nélkül → 401 |
 | `test_received_ratings_returns_average_and_count_for_current_user_only` | A `GET /api/myratings` csak a nekem szóló értékeléseket adja, helyes átlaggal és darabszámmal |
 
+
 ### Teszt-segéd: `completedRental()`
 
 A `RatingTest` minden esete egy lezárt bérlésből indul, ezért egy privát segéd állítja elő: két user (tulajdonos, bérlő), egy gear és egy `completed` státuszú rental, amit tömbként ad vissza (`[$owner, $renter, $rental]`). A tesztek PHP destrukturálással bontják szét (`[$owner, $renter, $rental] = $this->completedRental();`), és csak a szükséges elemeket veszik fel (`[, $renter, $rental]`).
 
 ### A `completed` állapot csak teszt-adat
 
-A `RentalFactory::completed()` közvetlenül `completed` rekordot állít elő. A valódi alkalmazásban a `completed` állapotba **jelenleg semmi nem juttat el** egy bérlést: az `accepted → active` (QR/Barion) és az `active → completed` (időzített lezárás) átmenet még nincs implementálva. Ezért az értékelés leadása a felületről egyelőre nem végigvihető, a lánc tesztelését a factory végzi.
+A `RentalFactory::completed()` közvetlenül `completed` rekordot állít elő. A valódi alkalmazásban a `completed` állapotba **jelenleg semmi nem juttat el** egy bérlést: az `accepted → active` átmenet már működik (QR-token, mock fizetéssel), de az `active → completed` (időzített lezárás) még nincs implementálva. Ezért az értékelés leadása a felületről egyelőre nem végigvihető, a lánc tesztelését a factory végzi.
 
 ### Kettős védelem a dupla értékelés ellen
 
 A második értékelés ellen két szinten van védelem: a `RatingController` `422`-t ad, és a `ratings` tábla `(rental_id, rater_id)` egyedi kulcsa adatbázis szinten is megakadályozza. A `test_cannot_rate_same_rental_twice` az első szintet ellenőrzi. Ha a controller-ellenőrzés hibázna, az egyedi kulcs `500`-at okozna `422` helyett, ez a teszt ezt az esetet fogja meg.
+
+## Nyitott, még nem lefedett terület
+
+- `GET /api/rentals/incoming`: nincs feature tesztje (a lényeg: csak a saját gear-jeimre érkezett, `pending` kérelmek szerepelnek benne)
+- `RentalController::index`/`destroy`: nincs route, tudatosan nincs elérve
+- Az `accepted → active` átmenet fizetés nélkül (mock) működik, a Barion-integráció nyitott
+- A `confirm-handover` frontend (QR megjelenítés és beolvasó oldal) még nincs megírva
+- Az `active → completed` átmenet (`rentals:complete-expired` Artisan parancs és ütemezés): az értékelés felületi leadásának előfeltétele
+- A `pending` kérelem automatikus lejárata (timeout): nyitott üzleti döntés
+- A publikus `GET /api/gears` szűrése: nincs teszt arra, hogy a `draft`/`unavailable` gear nem jelenik meg a nyilvános listában
+- Frontend oldali tesztelés (Playwright): tudatosan elhalasztva, az E2E a lánc `active → completed` szakaszát egyelőre a factory-ra bízza
