@@ -5,7 +5,6 @@ use App\Http\Controllers\GearController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\RentalController;
 use App\Http\Controllers\UserController;
-use App\Models\Gear;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -27,10 +26,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/rentals', [RentalController::class, 'store']);
     Route::patch('/rentals/{rental}', [RentalController::class, 'update']);
     Route::get('/rentals/incoming', [RentalController::class, 'incoming']);
+    Route::get('/rentals/{rental}', [RentalController::class, 'show']);
 
     // Ratings
     Route::post('/rentals/{rental}/ratings', [RatingController::class, 'store']);
     Route::get('/myratings', [RatingController::class, 'received']);
+
+    // Handover
+    Route::post('/rentals/{rental}/confirm-handover', [RentalController::class, 'confirmHandover']);
 });
 
 
