@@ -114,4 +114,17 @@ class RentalController extends Controller
 
         return new RentalResource($rental);
     }
+
+    public function mine(Request $request)
+    {
+        $userId = $request->user()->id;
+
+        $rentals = Rental::where('renter_id', $userId)
+            ->orWhereHas('gear', fn($q) => $q->where('user_id', $userId))
+            ->with(['gear', 'renter'])
+            ->latest()
+            ->get();
+
+        return RentalResource::collection($rentals);
+    }
 }
