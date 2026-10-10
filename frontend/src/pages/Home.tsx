@@ -79,14 +79,13 @@ export default function Home({
 
           {!loading && !error && gears.map((gear) => (
             <button
-              key={gear.id} onClick={()=>navigate(`/gears/${gear.id}`)}
+              key={gear.id} onClick={() => navigate(`/gears/${gear.id}`)}
               className="text-left cursor-pointer p-0 bg-white border border-[#e3e0da] rounded-[11px] overflow-hidden"
             >
-              <div className="h-33 bg-[#eceae5] flex items-start p-2.5">
-                <span className="px-2 py-1 rounded-full bg-white border border-[#e3e0da] font-mono text-[9.5px] text-success">
-                  SZABAD
-                </span>
-              </div>
+              <span className={`mx-1 px-3 py-1 rounded-full bg-white border border-[#e3e0da] font-mono text-[9.5px] ${gear.is_rented ? 'text-danger' : 'text-success'
+                }`}>
+                {gear.is_rented ? 'FOGLALT' : 'SZABAD'}
+              </span>
               <div className="px-3.75 pt-3.5 pb-3.75">
                 <p className="text-[15px] leading-[1.3] font-semibold text-ink m-0 mb-1">{gear.title}</p>
                 <p className="text-xs text-[#8b877f] m-0 mb-2.5">{gear.city}</p>
