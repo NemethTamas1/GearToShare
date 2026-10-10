@@ -14,8 +14,13 @@ class GearController extends Controller
 {
     public function index()
     {
-        $availableGears = Gear::where("status", "available")->paginate(15);
-
+        $availableGears = Gear::where("status", "available")
+            ->withExists(['rentals as is_rented' => function ($q) {
+                $q->whereIn('status', ['accepted', 'active'])
+                    ->whereDate('start_date', '<=', today())
+                    ->whereDate('end_date', '>=', today());
+            }])->paginate(15);
+            
         return GearResource::collection($availableGears);
     }
 
