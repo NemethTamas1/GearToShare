@@ -7,6 +7,7 @@ export interface Gear {
   price_per_day: string;
   city: string;
   status: 'available' | 'draft' | 'unavailable';
+  is_rented: boolean;
 }
 
 export interface Category {
