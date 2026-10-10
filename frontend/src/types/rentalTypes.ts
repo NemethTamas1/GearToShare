@@ -10,3 +10,8 @@ export interface Rental {
     gear?: { id: number; title: string };
     renter?: { id: number; name: string };
 }
+
+export interface RentalDetail extends Rental {
+  contact?: { address?: string; phone: string | null };
+  handover_token?: string;
+}
