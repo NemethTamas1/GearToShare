@@ -24,6 +24,7 @@ class GearResource extends JsonResource
             //"address" => $this->address,
             "status" => $this->status,
             "attributes" => $this->attributes,
+            'is_rented' => (bool) ($this->is_rented ?? false),
         ];
     }
 }
