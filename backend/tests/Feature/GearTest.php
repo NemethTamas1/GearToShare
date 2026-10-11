@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Gear;
+use App\Models\Rental;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -226,5 +227,50 @@ class GearTest extends TestCase
         $this->actingAs($owner)
             ->patchAsFrontend("/api/gears/{$gear->id}/status", ['status' => 'rented'])
             ->assertStatus(422);
+    }
+
+    public function test_gear_is_rented_when_accepted_rental_covers_today(): void
+    {
+        $owner = User::factory()->create();
+        $renter = User::factory()->create();
+        $gear = Gear::factory()->for($owner)->handTool()->create(['status' => 'available']);
+
+        Rental::factory()->for($gear)->for($renter, 'renter')->accepted()->create([
+            'start_date' => now()->subDay()->toDateString(),
+            'end_date' => now()->addDay()->toDateString(),
+        ]);
+
+        $this->getAsFrontend('/api/gears')
+            ->assertStatus(200)
+            ->assertJsonPath('data.0.is_rented', true);
+    }
+
+    public function test_gear_is_not_rented_when_rental_is_only_pending(): void
+    {
+        $owner = User::factory()->create();
+        $renter = User::factory()->create();
+        $gear = Gear::factory()->for($owner)->handTool()->create(['status' => 'available']);
+
+        Rental::factory()->for($gear)->for($renter, 'renter')->create([
+            'start_date' => now()->subDay()->toDateString(),
+            'end_date' => now()->addDay()->toDateString(),
+        ]);
+
+        $this->getAsFrontend('/api/gears')
+            ->assertJsonPath('data.0.is_rented', false);
+    }
+
+    public function test_gear_is_not_rented_when_accepted_rental_is_in_the_future(): void
+    {
+        $owner = User::factory()->create();
+        $renter = User::factory()->create();
+        $gear = Gear::factory()->for($owner)->handTool()->create(['status' => 'available']);
+        Rental::factory()->for($gear)->for($renter, 'renter')->accepted()->create([
+            'start_date' => now()->addDays(5)->toDateString(),
+            'end_date' => now()->addDays(8)->toDateString(),
+        ]);
+
+        $this->getAsFrontend('/api/gears')
+            ->assertJsonPath('data.0.is_rented', false);
     }
 }
