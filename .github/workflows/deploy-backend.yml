@@ -1,0 +1,33 @@
+name: Deploy backend (staging)
+
+on:
+  workflow_run:
+    workflows: ["Backend tests"]
+    types: [completed]
+    branches: [dev]
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' }}
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Start database machine
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          MACHINE_ID=$(flyctl machine list --app geartoshare-db-staging --json | jq -r '.[0].id')
+          flyctl machine start "$MACHINE_ID" --app geartoshare-db-staging || true
+          sleep 15
+
+      - name: Deploy backend
+        working-directory: backend
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy --remote-only --config fly.staging.toml --app geartoshare-backend-staging
