@@ -19,3 +19,17 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run build
+
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Deploy frontend
+        working-directory: frontend
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_FRONTEND }}
+        run: flyctl deploy --remote-only --config fly.staging.toml --app geartoshare-frontend-staging
