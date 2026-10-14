@@ -20,9 +20,24 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+              - '.github/workflows/frontend.yml'
+
+
   deploy:
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    needs: [build, changes]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev' && needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     environment: staging
     steps:
