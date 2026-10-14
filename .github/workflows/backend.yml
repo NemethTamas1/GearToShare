@@ -18,10 +18,24 @@ jobs:
       - run: composer install --no-interaction --prefer-dist
       - run: cp .env.example .env && php artisan key:generate
       - run: php artisan test
+
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - '.github/workflows/backend.yml'
     
   deploy:
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    needs: [test, changes]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev' && needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     environment: staging
     steps:
