@@ -22,7 +22,7 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      backend: ${{ step.filter.outputs.backend }}
+      backend: ${{ steps.filter.outputs.backend }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
