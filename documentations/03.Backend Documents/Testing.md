@@ -6,6 +6,10 @@
 
 A projekt PHPUnit-ot használ (nem Pest), class-alapú, test_ prefixű metódusnevekkel.
 
+## Futtatás CI-ban
+
+A tesztek minden pull requesten és a `dev`/`main` ágra érkező push-on automatikusan lefutnak GitHub Actions alatt (`backend.yml`, `test` job). A `test` check kötelező a `dev` ág védelmében. Részletek: a CI/CD dokumentáció (Program documentations mappa).
+
 ## Közös teszt-infrastruktúra — `TestCase` segéd-metódusok
 
 ```php
@@ -48,6 +52,13 @@ Az `Accept: application/json` külön szükséges: enélkül egy nem-hitelesíte
 | `test_owner_can_change_gear_status` | `PATCH /api/gears/{gear}/status` tulajdonosnak → 200, a státusz módosul |
 | `test_non_owner_cannot_change_gear_status` | Idegen user → 403, a státusz változatlan |
 | `test_gear_status_rejects_invalid_value` | Érvénytelen érték (`rented`) → 422 |
+| `test_gear_is_rented_when_accepted_rental_covers_today` | `accepted` bérlés, ami a mai napot fedi → `GET /api/gears` válaszában `is_rented = true` |
+| `test_gear_is_not_rented_when_rental_is_only_pending` | Csak `pending` kérelem → `is_rented = false` |
+| `test_gear_is_not_rented_when_accepted_rental_is_in_the_future` | Jövőbeli `accepted` bérlés → `is_rented = false` |
+
+### Foglaltság (`is_rented`)
+
+A `GET /api/gears` minden gear mellé egy számított `is_rented` mezőt ad, amit a `withExists` egyetlen allekérdezéssel számol (nincs N+1). Egy gear **foglalt**, ha van hozzá `accepted` vagy `active` bérlés, aminek az időszaka a mai napot lefedi. A `pending` kérelem nem számít. A gear `status` mezője ettől független: az a tulajdonos szándékát fejezi ki, a foglaltság a `rentals` táblából élőben számolódik.
 
 ## `RentalTest.php`
 
@@ -76,6 +87,10 @@ Az `Accept: application/json` külön szükséges: enélkül egy nem-hitelesíte
 | `test_confirm_handover_rejects_wrong_token` | Rossz token → 422, a státusz marad `accepted` |
 | `test_owner_cannot_confirm_handover` | A tulajdonos nem erősítheti meg → 403 |
 | `test_handover_token_cannot_be_used_twice` | Másodszor ugyanazzal a tokennel → 422 |
+| `test_renter_sees_own_rental_in_myrentals` | A bérlő látja a saját bérlését a `GET /api/myrentals` listában |
+| `test_owner_sees_rental_received_on_own_gear_in_myrentals` | A tulajdonos látja a saját gear-jére érkezett bérlést |
+| `test_unrelated_user_sees_empty_myrentals` | Idegen user üres listát kap |
+| `test_guest_cannot_list_myrentals` | Vendég → 401 |
 | `test_renter_sees_own_rental_in_myrentals` | A bérlő látja a saját bérlését a `GET /api/myrentals` listában |
 | `test_owner_sees_rental_received_on_own_gear_in_myrentals` | A tulajdonos látja a saját gear-jére érkezett bérlést |
 | `test_unrelated_user_sees_empty_myrentals` | Idegen user üres listát kap |
@@ -109,11 +124,10 @@ A második értékelés ellen két szinten van védelem: a `RatingController` `4
 
 ## Nyitott, még nem lefedett terület
 
-- `GET /api/rentals/incoming`: nincs feature tesztje (a lényeg: csak a saját gear-jeimre érkezett, `pending` kérelmek szerepelnek benne)
+- `GET /api/rentals/incoming`: nincs feature tesztje (lényeg: csak a saját gear-jeimre érkezett, `pending` kérelmek szerepelnek benne)
 - `RentalController::index`/`destroy`: nincs route, tudatosan nincs elérve
 - Az `accepted → active` átmenet fizetés nélkül (mock) működik, a Barion-integráció nyitott
-- A `confirm-handover` frontend (QR megjelenítés és beolvasó oldal) még nincs megírva
 - Az `active → completed` átmenet (`rentals:complete-expired` Artisan parancs és ütemezés): az értékelés felületi leadásának előfeltétele
 - A `pending` kérelem automatikus lejárata (timeout): nyitott üzleti döntés
 - A publikus `GET /api/gears` szűrése: nincs teszt arra, hogy a `draft`/`unavailable` gear nem jelenik meg a nyilvános listában
-- Frontend oldali tesztelés (Playwright): tudatosan elhalasztva, az E2E a lánc `active → completed` szakaszát egyelőre a factory-ra bízza
+- Frontend oldali tesztelés (Playwright): tudatosan elhalasztva
