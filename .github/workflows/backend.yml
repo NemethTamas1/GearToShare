@@ -55,4 +55,12 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: flyctl deploy --remote-only --config fly.staging.toml --app geartoshare-backend-staging
+
+      - name: Stop database machine
+        if: always()
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN_DB }}
+        run: |
+          MACHINE_ID=$(flyctl machine list --app geartoshare-db-staging --json | jq -r '.[0].id')
+          flyctl machine stop "$MACHINE_ID" --app geartoshare-db-staging || true
       
