@@ -135,7 +135,7 @@ A második értékelés ellen két szinten van védelem: a `RatingController` `4
 - `GET /api/rentals/incoming`: nincs feature tesztje (lényeg: csak a saját gear-jeimre érkezett, `pending` kérelmek szerepelnek benne)
 - `RentalController::index`/`destroy`: nincs route, tudatosan nincs elérve
 - Az `accepted → active` átmenet fizetés nélkül (mock) működik, a Barion-integráció nyitott
-- Az `active → completed` átmenet (`rentals:complete-expired` Artisan parancs és ütemezés): az értékelés felületi leadásának előfeltétele
+- Az `rentals:complete-expired` parancs napi ütemezése be van állítva, de a stagingen nincs futó ütemező (`schedule:run`), ott kézzel hívható
 - A `pending` kérelem automatikus lejárata (timeout): nyitott üzleti döntés
 - A publikus `GET /api/gears` szűrése: nincs teszt arra, hogy a `draft`/`unavailable` gear nem jelenik meg a nyilvános listában
 - Frontend oldali tesztelés (Playwright): tudatosan elhalasztva
