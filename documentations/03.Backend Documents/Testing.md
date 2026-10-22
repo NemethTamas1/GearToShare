@@ -96,6 +96,14 @@ A `GET /api/gears` minden gear mellé egy számított `is_rented` mezőt ad, ami
 | `test_unrelated_user_sees_empty_myrentals` | Idegen user üres listát kap |
 | `test_guest_cannot_list_myrentals` | Vendég → 401 |
 
+## `CompleteExpiredRentalsTest.php`
+
+| Teszt | Mit ellenőriz |
+|---|---|
+| `test_active_rental_past_end_date_becomes_completed` | A múltbeli `end_date`-jű `active` bérlés `completed` lesz |
+| `test_active_rental_ending_today_stays_active` | Az `end_date` napján a bérlés még `active` marad |
+| `test_accepted_rental_is_not_completed_even_if_expired` | Sosem átvett (`accepted`) bérlés nem záródik le |
+
 ## `RatingTest.php`
 
 | Teszt | Mit ellenőriz |
