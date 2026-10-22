@@ -96,6 +96,14 @@ A `GET /api/gears` minden gear mellé egy számított `is_rented` mezőt ad, ami
 | `test_unrelated_user_sees_empty_myrentals` | Idegen user üres listát kap |
 | `test_guest_cannot_list_myrentals` | Vendég → 401 |
 
+## `CompleteExpiredRentalsTest.php`
+
+| Teszt | Mit ellenőriz |
+|---|---|
+| `test_active_rental_past_end_date_becomes_completed` | A múltbeli `end_date`-jű `active` bérlés `completed` lesz |
+| `test_active_rental_ending_today_stays_active` | Az `end_date` napján a bérlés még `active` marad |
+| `test_accepted_rental_is_not_completed_even_if_expired` | Sosem átvett (`accepted`) bérlés nem záródik le |
+
 ## `RatingTest.php`
 
 | Teszt | Mit ellenőriz |
@@ -127,7 +135,7 @@ A második értékelés ellen két szinten van védelem: a `RatingController` `4
 - `GET /api/rentals/incoming`: nincs feature tesztje (lényeg: csak a saját gear-jeimre érkezett, `pending` kérelmek szerepelnek benne)
 - `RentalController::index`/`destroy`: nincs route, tudatosan nincs elérve
 - Az `accepted → active` átmenet fizetés nélkül (mock) működik, a Barion-integráció nyitott
-- Az `active → completed` átmenet (`rentals:complete-expired` Artisan parancs és ütemezés): az értékelés felületi leadásának előfeltétele
+- Az `rentals:complete-expired` parancs napi ütemezése be van állítva, de a stagingen nincs futó ütemező (`schedule:run`), ott kézzel hívható
 - A `pending` kérelem automatikus lejárata (timeout): nyitott üzleti döntés
 - A publikus `GET /api/gears` szűrése: nincs teszt arra, hogy a `draft`/`unavailable` gear nem jelenik meg a nyilvános listában
 - Frontend oldali tesztelés (Playwright): tudatosan elhalasztva
