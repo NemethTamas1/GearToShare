@@ -11,7 +11,7 @@ class FakePaymentGateway implements PaymentGateway
     {
         return new PaymentResult(
             paymentId: 'fake_' . Str::uuid(),
-            redirectUrl: config('app.frontend_url', 'http://localhost:5173') . "/rentals/{$rental->id}",
+            redirectUrl: config('app.frontend_url', 'http://localhost:5173') . "/rentals/{$rental->id}/payment-return",
         );
     }
 
