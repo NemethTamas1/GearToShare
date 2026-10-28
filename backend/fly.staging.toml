@@ -14,6 +14,7 @@ console_command = 'php /var/www/html/artisan tinker'
   LOG_STDERR_FORMATTER = 'Monolog\Formatter\JsonFormatter'
   SESSION_DRIVER = 'database'
   SESSION_SECURE_COOKIE = 'true'
+  FRONTEND_URL = "https://app.staging.geartoshare.hu"
 
 [deploy]
   release_command = 'php artisan migrate --force'
