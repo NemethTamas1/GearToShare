@@ -8,8 +8,10 @@ use App\Http\Resources\RentalDetailResource;
 use App\Http\Resources\RentalResource;
 use App\Models\Gear;
 use App\Models\Rental;
+use App\Services\Payments\PaymentGateway;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class RentalController extends Controller
@@ -91,7 +93,7 @@ class RentalController extends Controller
         return RentalResource::collection($rentals);
     }
 
-    public function confirmHandover(Request $request, Rental $rental)
+    public function confirmHandover(Request $request, Rental $rental, PaymentGateway $payments)
     {
         $request->validate(['token' => ['required', 'string']]);
 
@@ -107,10 +109,42 @@ class RentalController extends Controller
             abort(422, "Érvénytelen átvételi kód.");
         }
 
-        $rental->status = 'active';
-        $rental->handover_confirmed_at = now();
-        $rental->handover_token = null;
+        $result = $payments->startPayment($rental);
+
+        $rental->barion_payment_id = $result->paymentId;
         $rental->save();
+
+        return response()->json(['redirect_url' => $result->redirectUrl]);
+    }
+
+    public function completePayment(Request $request, Rental $rental, PaymentGateway $payments)
+    {
+        if ($request->user()->id !== $rental->renter_id) {
+            abort(403, "Unauthorized action.");
+        }
+
+        if ($rental->status === 'active') {
+            return new RentalResource($rental);
+        }
+
+        if ($rental->status !== 'accepted') {
+            abort(422, "Ez a bérlés nem véglegesíthető.");
+        }
+
+        if (!$rental->barion_payment_id) {
+            abort(422, "Ehhez a bérléshez nincs elindított fizetés.");
+        }
+
+        if (! $payments->isPaid($rental->barion_payment_id)) {
+            abort(422, "A fizetés még nem érkezett meg.");
+        }
+
+        DB::transaction(function () use ($rental) {
+            $rental->status = 'active';
+            $rental->handover_confirmed_at = now();
+            $rental->handover_token = null;
+            $rental->save();
+        });
 
         return new RentalResource($rental);
     }
