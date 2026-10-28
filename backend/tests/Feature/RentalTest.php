@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Gear;
 use App\Models\Rental;
 use App\Models\User;
+use App\Services\Payments\PaymentGateway;
+use App\Services\Payments\PaymentResult;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -282,12 +284,14 @@ class RentalTest extends TestCase
 
         $this->actingAs($renter)
             ->postAsFrontend("/api/rentals/{$rental->id}/confirm-handover", ['token' => 'test-token'])
-            ->assertStatus(200);
+            ->assertStatus(200)
+            ->assertJsonStructure(['redirect_url']);
 
         $fresh = $rental->fresh();
-        $this->assertSame('active', $fresh->status);
-        $this->assertNull($fresh->handover_token);
-        $this->assertNotNull($fresh->handover_confirmed_at);
+        $this->assertSame('accepted', $fresh->status);
+        $this->assertNotNull($fresh->barion_payment_id);
+        $this->assertSame('test-token', $fresh->handover_token);
+        $this->assertNull($fresh->handover_confirmed_at);
     }
 
     public function test_confirm_handover_rejects_wrong_token(): void
@@ -320,22 +324,28 @@ class RentalTest extends TestCase
             ->assertStatus(403);
     }
 
-    public function test_handover_token_cannot_be_used_twice(): void
+    public function test_complete_payment_is_idempotent(): void
     {
         $owner = User::factory()->create();
         $renter = User::factory()->create();
         $gear = Gear::factory()->for($owner)->handTool()->create();
         $rental = Rental::factory()->for($gear)->for($renter, 'renter')->accepted()->create([
             'handover_token' => 'test-token',
+            'barion_payment_id' => 'fake_123',
         ]);
 
         $this->actingAs($renter)
-            ->postAsFrontend("/api/rentals/{$rental->id}/confirm-handover", ['token' => 'test-token'])
+            ->postAsFrontend("/api/rentals/{$rental->id}/complete-payment")
             ->assertStatus(200);
 
         $this->actingAs($renter)
-            ->postAsFrontend("/api/rentals/{$rental->id}/confirm-handover", ['token' => 'test-token'])
-            ->assertStatus(422);
+            ->postAsFrontend("/api/rentals/{$rental->id}/complete-payment")
+            ->assertStatus(200);
+
+
+        $fresh = $rental->fresh();
+        $this->assertSame('active', $fresh->status);
+        $this->assertNull($fresh->handover_token);
     }
 
     public function test_owner_sees_handover_token(): void
@@ -412,4 +422,36 @@ class RentalTest extends TestCase
     {
         $this->getAsFrontend('/api/myrentals')->assertStatus(401);
     }
+
+    public function test_complete_payment_fails_when_payment_is_not_paid(): void
+{
+    $this->app->bind(PaymentGateway::class, fn () => new class implements PaymentGateway {
+        public function startPayment(Rental $rental): PaymentResult
+        {
+            return new PaymentResult('x', 'http://x');
+        }
+
+        public function isPaid(string $paymentId): bool
+        {
+            return false;
+        }
+    });
+
+    $owner = User::factory()->create();
+    $renter = User::factory()->create();
+    $gear = Gear::factory()->for($owner)->handTool()->create();
+    $rental = Rental::factory()->for($gear)->for($renter, 'renter')->accepted()->create([
+        'handover_token' => 'test-token',
+        'barion_payment_id' => 'fake_123',
+    ]);
+
+    $this->actingAs($renter)
+        ->postAsFrontend("/api/rentals/{$rental->id}/complete-payment")
+        ->assertStatus(422);
+
+    $fresh = $rental->fresh();
+    $this->assertSame('accepted', $fresh->status);
+    $this->assertSame('test-token', $fresh->handover_token);
+    $this->assertNull($fresh->handover_confirmed_at);
+}
 }
