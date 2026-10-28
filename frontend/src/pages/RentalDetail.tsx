@@ -62,7 +62,10 @@ export default function RentalDetail() {
                 {qrUrl && (
                     <div className="border border-[#e3e0da] bg-white rounded-xl p-4 flex flex-col items-center">
                         <h2 className="text-xs font-mono tracking-wider text-sec mb-3">ÁTVÉTELI KÓD</h2>
-                        <QRCodeSVG value={qrUrl} size={200}/>
+                        <QRCodeSVG value={qrUrl} size={200} />
+                        {import.meta.env.DEV && qrUrl && (
+                            <p className="text-[10px] break-all text-secondary mt-2">{qrUrl}</p>
+                        )}
                         <p className="text-xs text-secondary mt-3 text-center">
                             Találkozáskor a bérlő beolvassa ezt a kódot a telefonjával.
                         </p>
