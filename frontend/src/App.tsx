@@ -9,6 +9,7 @@ import GearDetail from './pages/GearDetail.tsx';
 import RentalDetail from './pages/RentalDetail.tsx';
 import ConfirmHandover from './pages/ConfirmHandover.tsx';
 import MyRentals from './pages/MyRentals.tsx';
+import PaymentReturn from './pages/PaymentReturn.tsx';
 
 function ProtectedRoute() {
   const { user, loading } = useAuth();
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/rentals" element={<MyRentals />} />
           <Route path="/rentals/:id" element={<RentalDetail />} />
           <Route path="/rentals/:id/confirm-handover" element={<ConfirmHandover />} />
+          <Route path="/rentals/:id/payment-return" element={<PaymentReturn />} />
         </Route>
       </Routes>
     </BrowserRouter>
