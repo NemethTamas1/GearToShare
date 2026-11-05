@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    'barion' => [
+        'pos_key' => env('BARION_POS_KEY'),
+        'payee' => env('BARION_PAYEE'),
+        'base_url' => env('BARION_BASE_URL'),
+        'callback_url' => env('BARION_CALLBACK_URL'),
+    ],
+
+    'payments' => [
+        'driver' => env('PAYMENT_DRIVER', 'fake'),
+    ],
+
 ];
