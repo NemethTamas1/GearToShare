@@ -38,7 +38,7 @@ class BarionPaymentGateway implements PaymentGateway
                 'Total' => $total,
                 'Items' => [[
                     'Name' => 'Bérlés: ' . $rental->id . '-tx',
-                    'Description' => 'Eszközbérlés' . $rental->start_date . ' - ' . $rental->end_date,
+                    'Description' => 'Eszközbérlés' . $rental->start_date->format('Y-m-d') . ' - ' . $rental->end_date->format('Y-m-d'),
                     'Quantity' => 1,
                     'Unit' => 'db',
                     'UnitPrice' => $total,
