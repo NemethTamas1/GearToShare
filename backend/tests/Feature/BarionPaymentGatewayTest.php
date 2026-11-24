@@ -9,6 +9,7 @@ use App\Services\Payments\BarionPaymentGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
+use RuntimeException;
 use Tests\TestCase;
 
 class BarionPaymentGatewayTest extends TestCase
@@ -46,10 +47,6 @@ class BarionPaymentGatewayTest extends TestCase
         $this->assertSame('https://pay.test/abc-123', $result->redirectUrl);
     }
 
-    //test_start_payment_sends_correct_request: Http::fake ugyanúgy,
-    //majd Http::assertSent(...)-ben ellenőrizd, hogy a Currency HUF,
-    //a Transactions[0]['Total'] pedig 7000 (egész szám, nem 7000.00),
-    //és a POSKey megegyezik a konstruktornak adottal.
     public function test_start_payment_sends_correct_request(): void
     {
         Http::fake([
@@ -66,5 +63,62 @@ class BarionPaymentGatewayTest extends TestCase
                 && $request['Transactions'][0]['Total'] === 7000
                 && $request['POSKey'] === 'teszt-kulcs';
         });
+    }
+
+    public function test_start_payment_throws_when_barion_returns_error(): void
+    {
+        Http::fake([
+            'barion.test/v2/Payment/Start' => Http::response([
+                'Errors' => [
+                    ["ErrorCode" => 'ShopIsInDraftState', 'Title' => 'Your shop is in draft state.'],
+                ]
+            ], 401),
+        ]);
+
+        $this->expectException(RuntimeException::class);
+
+        $this->gateway()->startPayment($this->rental());
+    }
+
+    public function test_is_paid_returns_true_when_status_is_succeeded(): void
+    {
+        Http::fake([
+            'barion.test/v4/payment/abc-123/paymentstate' => Http::response([
+                "Status" => "Succeeded",
+            ], 200),
+        ]);
+
+        $this->assertTrue($this->gateway()->isPaid('abc-123'));
+    }
+
+    public function test_is_paid_returns_false_when_status_is_prepared(): void
+    {
+        Http::fake([
+            'barion.test/v4/payment/abc-123/paymentstate' => Http::response([
+                "Status" => "Prepared"
+            ], 200),
+        ]);
+
+        $this->assertFalse($this->gateway()->isPaid('abc-123'));
+    }
+
+    public function test_is_paid_returns_false_when_status_is_canceled(): void
+    {
+        Http::fake([
+            'barion.test/v4/payment/abc-123/paymentstate' => Http::response([
+                "Status" => "Canceled"
+            ], 200),
+        ]);
+
+        $this->assertFalse($this->gateway()->isPaid('abc-123'));
+    }
+
+    public function test_is_paid_returns_false_when_barion_returns_server_error(): void
+    {
+        Http::fake([
+            'barion.test/v4/payment/abc-123/paymentstate' => Http::response([], 500),
+        ]);
+
+        $this->assertFalse($this->gateway()->isPaid('abc-123'));
     }
 }

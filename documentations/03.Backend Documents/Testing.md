@@ -130,6 +130,24 @@ A `RentalFactory::completed()` közvetlenül `completed` rekordot állít elő. 
 
 A második értékelés ellen két szinten van védelem: a `RatingController` `422`-t ad, és a `ratings` tábla `(rental_id, rater_id)` egyedi kulcsa adatbázis szinten is megakadályozza. A `test_cannot_rate_same_rental_twice` az első szintet ellenőrzi. Ha a controller-ellenőrzés hibázna, az egyedi kulcs `500`-at okozna `422` helyett, ez a teszt ezt az esetet fogja meg.
 
+## BarionPaymentGatewayTest
+
+A `BarionPaymentGateway` osztály tesztjei. Valódi hálózati hívás nincs: a `Http::fake()` hamis Barion-választ ad, a gateway-t közvetlenül példányosítjuk (`new BarionPaymentGateway('http://barion.test', 'teszt-kulcs', 'teszt@mail.hu')`), így a teszt nem függ a `PAYMENT_DRIVER` beállítástól.
+
+| Teszt | Mit bizonyít |
+|---|---|
+| `test_start_payment_returns_payment_id_and_gateway_url` | A válaszból jól olvassa a `PaymentId`-t és a `GatewayUrl`-t |
+| `test_start_payment_sends_correct_request` | A kimenő kérés helyes: `Currency` = `HUF`, `Total` egész szám, `POSKey` a konstruktoré (`Http::assertSent`) |
+| `test_start_payment_throws_when_barion_returns_error` | Hibás Barion-válasznál (`401`) `RuntimeException` |
+| `test_is_paid_returns_true_when_status_is_succeeded` | Csak a `Succeeded` státusz jelent fizetettet |
+| `test_is_paid_returns_false_when_status_is_prepared` | `Prepared` esetén nem fizetett |
+| `test_is_paid_returns_false_when_status_is_canceled` | `Canceled` esetén nem fizetett |
+| `test_is_paid_returns_false_when_barion_returns_server_error` | Barion hiba (`500`) esetén nem fizetett (biztonságos irány) |
+
+A teljes backend tesztszám: **69**.
+
+A bérlési logika tesztjei (`RentalTest`) a `FakePaymentGateway`-t használják: a `phpunit.xml` `PAYMENT_DRIVER=fake` értéke a `.env`-nél erősebb, ezért teszt alatt soha nem fut valódi Barion-hívás. A valódi sandboxot kézzel, teszt kártyákkal próbáljuk ki.
+
 ## Nyitott, még nem lefedett terület
 
 - `GET /api/rentals/incoming`: nincs feature tesztje (lényeg: csak a saját gear-jeimre érkezett, `pending` kérelmek szerepelnek benne)
